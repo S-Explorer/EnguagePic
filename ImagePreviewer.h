@@ -17,9 +17,15 @@ public:
 protected:
     void wheelEvent(QWheelEvent* e) override;
 
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
 private:
     QGraphicsScene *m_scene;
     QGraphicsPixmapItem *m_item = nullptr;
+    QPoint m_last_m_pos;
+    bool m_is_midbtn_press = false;
 };
 
 #endif

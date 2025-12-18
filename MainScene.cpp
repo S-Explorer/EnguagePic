@@ -15,7 +15,7 @@ MainScene::MainScene(QWidget* parent)
 
     QHBoxLayout* main_layout = new QHBoxLayout;
     QWidget* container_widget = new QWidget;
-    container_widget->setFixedWidth(50);
+    container_widget->setFixedWidth(150);
     
     main_layout->addWidget(pic_viewer);
     main_layout->addWidget(container_widget);
