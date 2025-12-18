@@ -6,11 +6,12 @@
 QVector<QString> header_data{"name","x","y","remove"};
 
 MarkerTable::MarkerTable(ImagePreviewer* viwer)
-    : m_viwer(viwer){}
+    : m_viwer(viwer){
+    connect(m_viwer, &ImagePreviewer::AddRow, this, &MarkerTable::InsertData);
+}
 
 int MarkerTable::rowCount(const QModelIndex & /* parent */) const  {
-    int marker_size = m_viwer->CurMarkerSize();
-    return marker_size;
+    return 3 + cur_points.size();
 }
 
 int MarkerTable::columnCount(const QModelIndex & /* parent */) const  {
@@ -32,17 +33,33 @@ QVariant MarkerTable::data(const QModelIndex &index, int role) const {
         case 1:
             // x position
             if (index.row() < 3) {
-                return m_viwer->axe_marker.at(index.row())->pixelPos.x();
+                if (index.row() < axe_points.size()) {
+                    return axe_points.at(index.row()).x();
+                }else {
+                    return QString("-");
+                }
             }else{
-                return m_viwer->cur_marker.at(index.row())->pixelPos.x();
+                if (index.row() < cur_points.size() + 3) {
+                    return cur_points.at(index.row() - 3).x();
+                }else {
+                    return QString("-");
+                }
             }
             break;
         case 2:
             // y position
             if (index.row() < 3) {
-                return m_viwer->axe_marker.at(index.row())->pixelPos.y();
+                if (index.row() < axe_points.size()) {
+                    return axe_points.at(index.row()).y();
+                }else {
+                    return QString("-");
+                }
             }else{
-                return m_viwer->cur_marker.at(index.row())->pixelPos.y();
+                if (index.row() < cur_points.size() + 3) {
+                    return cur_points.at(index.row() - 3).y();
+                }else {
+                    return QString("-");
+                }
             }
             break;
         case 3:
@@ -54,10 +71,8 @@ QVariant MarkerTable::data(const QModelIndex &index, int role) const {
     }
     // color
     if (role == Qt::BackgroundRole) {
-        if (index.row() == 0) {
+        if (index.row() < 3) {
             return QColor(Qt::gray);
-        }else if (index.row() < 3) {
-            return QColor(Qt::yellow);
         }else{
             return QColor(Qt::magenta);
         }
@@ -81,4 +96,15 @@ QVariant MarkerTable::headerData(int section, Qt::Orientation orientation, int r
     }
 
     return QVariant();
+}
+
+void MarkerTable::InsertData(bool is_axe, qreal x, qreal y){
+    
+    beginResetModel();
+    if (is_axe){
+        axe_points.emplace_back(QPointF(x, y));
+    }else {
+        cur_points.emplace_back(QPointF(x, y));
+    }
+    endResetModel();
 }

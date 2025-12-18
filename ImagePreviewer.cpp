@@ -129,6 +129,7 @@ void ImagePreviewer::mousePressEvent(QMouseEvent *event)
             MarkerPoint* m = new MarkerPoint(tmp_c);
             m->addToScene(m_scene, scenePos);
             tmp->append(m);
+            emit AddRow(false, scenePos.x(), scenePos.y());
             qDebug() << "marker size : " << tmp->size() << ", pos : " << scenePos;
         }
 

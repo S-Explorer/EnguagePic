@@ -18,7 +18,11 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
+    void InsertData(bool is_axe, qreal x, qreal y);
+
     ImagePreviewer* m_viwer;
+    QVector<QPointF> axe_points;
+    QVector<QPointF> cur_points;
 };
 
 #endif // MARKERTABLE_H

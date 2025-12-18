@@ -39,6 +39,9 @@ public:
     void ResetMarker();
     int CurMarkerSize();
 
+signals:
+    void AddRow(bool is_axe, qreal x, qreal y);
+
 protected:
     void wheelEvent(QWheelEvent* e) override;
 
