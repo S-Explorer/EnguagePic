@@ -18,6 +18,7 @@ private:
 
 
     QPushButton* btn_pic;
+    QPushButton* btn_clear_marker;
     ImagePreviewer* pic_viewer;
 };
 
