@@ -30,11 +30,14 @@ class ImagePreviewer : public QGraphicsView {
     Q_OBJECT
 
 public:
+    friend class MarkerTable;
+
     ImagePreviewer(QWidget *parent = nullptr);
 
     void LoadImage(const QString &pic_path);
     void SetCurMode(DRAW_MODE mode);
     void ResetMarker();
+    int CurMarkerSize();
 
 protected:
     void wheelEvent(QWheelEvent* e) override;

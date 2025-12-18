@@ -1,33 +1,45 @@
 #include "MainScene.h"
 #include "ImagePreviewer.h"
+#include "MarkerTable.h"
+
 #include <QFileDialog>
 #include <QPushButton>
-
+#include <QTableView>
 #include <QBoxLayout>
 #include <QHBoxLayout>
+#include <QHeaderView>
 
 MainScene::MainScene(QWidget* parent)
     :QWidget(parent){
     setGeometry(600, 300, 800, 500);
 
+    QVBoxLayout* main_layout = new QVBoxLayout;
+    QHBoxLayout* btn_Layout = new QHBoxLayout;
+    QHBoxLayout* sec_layout = new QHBoxLayout;
 
-    QHBoxLayout* main_layout = new QHBoxLayout;
-    QWidget* container_widget = new QWidget;
+    main_layout->addLayout(btn_Layout);
+    main_layout->addLayout(sec_layout);
+
     pic_viewer = new ImagePreviewer;
+    data_viewer = new QTableView;
+    MarkerTable* m_table_model = new MarkerTable(pic_viewer);
+    data_viewer->setMaximumWidth(400);
+    data_viewer->setModel(m_table_model);
+    data_viewer->verticalHeader()->hide();
 
-    container_widget->setFixedWidth(150);
-    main_layout->addWidget(pic_viewer);
-    main_layout->addWidget(container_widget);
-    setLayout(main_layout);
-
-    QVBoxLayout* util_layout = new QVBoxLayout;
+    sec_layout->addWidget(pic_viewer);
+    sec_layout->addWidget(data_viewer);
 
     btn_pic = new QPushButton("open pic");
+    btn_axe = new QPushButton("axe");
+    btn_point = new QPushButton("P");
     btn_clear_marker = new QPushButton("clear marker");
-    util_layout->addWidget(btn_pic);
-    util_layout->addWidget(btn_clear_marker);
+    btn_Layout->addWidget(btn_pic);
+    btn_Layout->addWidget(btn_axe);
+    btn_Layout->addWidget(btn_point);
+    btn_Layout->addWidget(btn_clear_marker);
 
-    container_widget->setLayout(util_layout);
+    setLayout(main_layout);
 
     connect(btn_pic, &QPushButton::clicked, this, &MainScene::OpenTargetPic);
     connect(btn_clear_marker, &QPushButton::clicked, pic_viewer, &ImagePreviewer::ResetMarker);
@@ -44,6 +56,14 @@ void MainScene::OpenTargetPic(){
             "image file(*.png, *.jpg)");
 
     pic_viewer->LoadImage(pic_path);
+}
+
+void MainScene::ExportData()
+{
+    QString data_path = QFileDialog::getSaveFileName(this,
+                            "save data",
+                            QString(),
+                            "csv file(*.csv)");
 }
 
 

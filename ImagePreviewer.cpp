@@ -10,9 +10,7 @@ MarkerPoint::MarkerPoint(Qt::GlobalColor c)
 
 void MarkerPoint::addToScene(QGraphicsScene* scene, QPointF pos) {
     pixelPos = pos;
-    qreal r = 5; // 半径
-
-    // 红色画笔
+    qreal r = 5;
     QPen pen(colorP, 2);
 
     // 十字圈：圆 + 横线 + 竖线
@@ -28,7 +26,6 @@ void MarkerPoint::clear(QGraphicsScene* scene) {
     delete circle; delete lineH; delete lineV;
     circle = nullptr;
 }
-
 
 
 /* * * * * * * * * * * * * * *
@@ -92,6 +89,10 @@ void ImagePreviewer::ResetMarker(){
     }
     axe_marker.clear();
     cur_marker.clear();
+}
+
+int ImagePreviewer::CurMarkerSize(){
+    return axe_marker.size() + cur_marker.size();
 }
 
 void ImagePreviewer::wheelEvent(QWheelEvent* e){
