@@ -64,7 +64,7 @@ void MainScene::OpenTargetPic(){
     QString pic_path = QFileDialog::getOpenFileName( this,
             "open data pic",
             QString(),
-            "image file(*.png, *.jpg)");
+            "image file(*.png *.jpg)");
 
     pic_viewer->LoadImage(pic_path);
 }
