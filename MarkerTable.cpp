@@ -15,6 +15,9 @@ QVector<QString> header_data{"name","x","y","remove"};
 
 MarkerTable::MarkerTable(ImagePreviewer* viwer)
     : m_viwer(viwer){
+    // prepare for store value
+    axe_real.resize(3);
+
     connect(m_viwer, &ImagePreviewer::AddRow, this, &MarkerTable::InsertData);
     connect(m_viwer, &ImagePreviewer::ClearData, this, &MarkerTable::ClearData);
     connect(this, &MarkerTable::RowDeleted, m_viwer, &ImagePreviewer::DelMarkerData);
@@ -31,7 +34,7 @@ int MarkerTable::columnCount(const QModelIndex & /* parent */) const  {
 
 QVariant MarkerTable::data(const QModelIndex &index, int role) const {
     // show data
-    if (role == Qt::DisplayRole) {
+    if (role == Qt::DisplayRole || role == Qt::EditRole) {
         switch (index.column()) {
         case 0:
             if (index.row() < 3) {
@@ -91,6 +94,7 @@ QVariant MarkerTable::data(const QModelIndex &index, int role) const {
     if (role == Qt::TextAlignmentRole) {
         return Qt::AlignCenter;
     }
+    // edit
 
     return QVariant();
 }
@@ -106,6 +110,30 @@ QVariant MarkerTable::headerData(int section, Qt::Orientation orientation, int r
     }
 
     return QVariant();
+}
+
+bool MarkerTable::setData(const QModelIndex &index, const QVariant &value, int role){
+    // editor
+    if (role == Qt::EditRole) {
+        if (index.column() != 1 && index.column() != 2 ) return false;;
+
+        if (index.row() < 3) {
+            // axe data
+            if (index.row() > axe_points.size() - 1) return false;
+            // ok
+            if (index.column() == 1) axe_real[index.row()].setX(value.toDouble());
+            else axe_real[index.row()].setY(value.toDouble());
+        }else {
+            // cur data
+            if (index.row() > cur_points.size() + 2) return false;
+            // ok
+            if (index.column() == 1) cur_real[index.row() - 3].setX(value.toDouble());
+            else cur_real[index.row() - 3].setY(value.toDouble());
+        }
+        return true;
+    }
+
+    return QAbstractTableModel::setData(index, value, role);
 }
 
 void MarkerTable::InsertData(bool is_axe, qreal x, qreal y){
@@ -146,4 +174,17 @@ void MarkerTable::DeleteRow(int row){
         endResetModel();
         emit RowDeleted(row);
     }
+}
+
+Qt::ItemFlags MarkerTable::flags(const QModelIndex &index) const
+{
+    if (!index.isValid()) return Qt::NoItemFlags;
+
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+    if (index.column() != 1 && index.column() != 2) return flags;
+
+    flags |= Qt::ItemIsEditable;
+
+    return flags;
 }

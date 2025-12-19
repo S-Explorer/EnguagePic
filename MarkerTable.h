@@ -10,10 +10,12 @@ class MarkerTable : public QAbstractTableModel{
 public:
     MarkerTable(ImagePreviewer* viwer);
     void DeleteRow(int row);
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
     int rowCount(const QModelIndex & /* parent */) const override;
     int columnCount(const QModelIndex & /* parent */) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
 signals:
     void RowDeleted(int row);
@@ -25,6 +27,9 @@ private:
     ImagePreviewer* m_viwer;
     QVector<QPointF> axe_points;
     QVector<QPointF> cur_points;
+
+    QVector<QPointF> axe_real;
+    QVector<QPointF> cur_real;
 };
 
 #endif // MARKERTABLE_H

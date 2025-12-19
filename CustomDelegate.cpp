@@ -1,8 +1,9 @@
 #include "CustomDelegate.h"
 
+#include <QLineEdit>
 #include <QDebug>
 
-#define BTN_BOUNDRY_SZIE 2
+#define BTN_BOUNDRY_SZIE 0
 
 /* * * * * * * * * * * * * * *
  *       ButtonDeleGate      *
@@ -23,12 +24,8 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
         btn_option.text = "delete";
         btn_option.state = QStyle::State_Enabled;
         
-        QWidget* widget = qobject_cast<QWidget*>(parent());
-        if (widget) {
-            QPoint mouse_pos = widget->mapFromGlobal(QCursor::pos());
-            if (m_btn_rect.contains(mouse_pos)){
-                btn_option.state |= QStyle::State_MouseOver;
-            }
+        if (option.state & QStyle::State_MouseOver){
+            btn_option.state |= QStyle::State_Raised;
         }
 
         QApplication::style()->drawControl(QStyle::CE_PushButton, &btn_option,
@@ -41,11 +38,11 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
 bool ButtonDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
         const QStyleOptionViewItem& option, const QModelIndex& index){
     if (index.column() == m_btn_col && index.row() < 3) {
-        if (e->type() == QEvent::MouseButtonPress){
+        if (e->type() == QEvent::MouseButtonRelease){
             qDebug() << "Button Delegate Preses : " << index.row() ;
             QMouseEvent* mosue_e = static_cast<QMouseEvent*>(e);
 
-            if (m_btn_rect.contains(mosue_e->pos())) {
+            if (option.rect.contains(mosue_e->pos())) {
                 emit Clicked(index.row());
                 qDebug() << "\tButton emit sig end!";
                 return true;
@@ -65,3 +62,32 @@ QSize ButtonDelegate::sizeHint(const QStyleOptionViewItem& option,
     return QStyledItemDelegate::sizeHint(option, index);
 }
 
+/* * * * * * * * * * * * * * *
+ *       EditDelegate        *
+ * * * * * * * * * * * * * * */
+
+EditDelegate::EditDelegate(QObject *parent)
+    : QStyledItemDelegate(parent){}
+
+QWidget *EditDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                                    const QModelIndex &index) const{
+    QLineEdit* new_editor = new QLineEdit(parent);
+    new_editor->setStyleSheet("QLineEdit { background-color: white; color: black; }");
+    return new_editor;
+}
+
+void EditDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const{
+    QString text = index.model()->data(index, Qt::DisplayRole).toString();
+    QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor);
+    lineEdit->setText(text);
+}
+
+void EditDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                                        const QModelIndex &index) const{
+    editor->setGeometry(option.rect);
+}
+
+void EditDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                         const QModelIndex &index) const{
+    QStyledItemDelegate::paint(painter, option, index);
+}

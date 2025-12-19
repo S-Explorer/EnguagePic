@@ -29,4 +29,21 @@ private:
     mutable QRect m_btn_rect;
 };
 
+class EditDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    explicit EditDelegate(QObject* parent = nullptr);
+
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
+            const QModelIndex& index)const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index)const override;
+    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+            const QModelIndex &index) const override;
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
+            const QModelIndex &index) const override;
+
+private:
+    QMap<int, double> m_data;
+};
+
 #endif

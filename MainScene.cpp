@@ -9,14 +9,15 @@
 #include <QBoxLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QComboBox>
 
 MainScene::MainScene(QWidget* parent)
     :QWidget(parent){
     setGeometry(600, 300, 1000, 500);
     setMinimumWidth(1000);
     QVBoxLayout* main_layout = new QVBoxLayout;
-    QHBoxLayout* btn_Layout = new QHBoxLayout;
-    QHBoxLayout* sec_layout = new QHBoxLayout;
+    QHBoxLayout* btn_Layout  = new QHBoxLayout;
+    QHBoxLayout* sec_layout  = new QHBoxLayout;
 
     main_layout->addLayout(btn_Layout);
     main_layout->addLayout(sec_layout);
@@ -25,11 +26,16 @@ MainScene::MainScene(QWidget* parent)
     data_viewer = new QTableView;
     MarkerTable* m_table_model = new MarkerTable(pic_viewer);
     ButtonDelegate* m_btn_del  = new ButtonDelegate(3, data_viewer);
+    EditDelegate* x_delegate   = new EditDelegate(data_viewer);
+    EditDelegate* y_delegate   = new EditDelegate(data_viewer);
     data_viewer->setMaximumWidth(450);
     data_viewer->setModel(m_table_model);
     data_viewer->setItemDelegateForColumn(3, m_btn_del);
+    data_viewer->setItemDelegateForColumn(1, x_delegate);
+    data_viewer->setItemDelegateForColumn(2, y_delegate);
     data_viewer->verticalHeader()->hide();
     data_viewer->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    data_viewer->setEditTriggers(QAbstractItemView::DoubleClicked);
 
     sec_layout->addWidget(pic_viewer);
     sec_layout->addWidget(data_viewer);
@@ -41,6 +47,10 @@ MainScene::MainScene(QWidget* parent)
     btn_clear_marker = new QPushButton("clear marker");
     btn_clear_axe    = new QPushButton("clear axe");
     btn_clear_point  = new QPushButton("clear points");
+    cbx_type         = new QComboBox();
+    cbx_type->addItems({"linear","logarithmic","axial"});
+    btn_cal_data     = new QPushButton("calculate");
+    btn_save         = new QPushButton("export data");
     btn_Layout->addWidget(btn_pic);
     btn_Layout->addWidget(btn_screen);
     btn_Layout->addWidget(btn_axe);
@@ -48,6 +58,9 @@ MainScene::MainScene(QWidget* parent)
     btn_Layout->addWidget(btn_clear_marker);
     btn_Layout->addWidget(btn_clear_axe);
     btn_Layout->addWidget(btn_clear_point);
+    btn_Layout->addWidget(cbx_type);
+    btn_Layout->addWidget(btn_cal_data);
+    btn_Layout->addWidget(btn_save);
     setLayout(main_layout);
 
     connect(btn_pic, &QPushButton::clicked, this, &MainScene::OpenTargetPic);

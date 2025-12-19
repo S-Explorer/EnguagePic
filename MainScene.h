@@ -7,6 +7,7 @@
 class ImagePreviewer;
 class QPushButton;
 class QTableView;
+class QComboBox;
 
 class MainScene : public QWidget{
     Q_OBJECT
@@ -28,6 +29,10 @@ private:
     QPushButton* btn_clear_marker;
     QPushButton* btn_clear_axe;
     QPushButton* btn_clear_point;
+    QPushButton* btn_cal_data;
+    QPushButton* btn_save;
+
+    QComboBox* cbx_type;
 
     QTableView* data_viewer;
 
