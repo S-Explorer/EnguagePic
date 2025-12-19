@@ -69,6 +69,7 @@ MainScene::MainScene(QWidget* parent)
     connect(btn_axe, &QPushButton::clicked, this, &MainScene::SetAxeMode);
     connect(btn_point, &QPushButton::clicked, this, &MainScene::SetPointMode);
     connect(m_btn_del, &ButtonDelegate::Clicked, m_table_model, &MarkerTable::DeleteRow);
+    connect(btn_cal_data, &QPushButton::clicked, [=](){m_table_model->CalRelData(0);});
 }
 
 MainScene::~MainScene() {

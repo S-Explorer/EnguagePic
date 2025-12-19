@@ -38,6 +38,7 @@ public:
     void SetCurMode(DRAW_MODE mode);
     void ResetMarker();
     int CurMarkerSize();
+    qreal GetImgHeight() const;
 
 signals:
     void AddRow(bool is_axe, qreal x, qreal y);
@@ -55,6 +56,8 @@ private:
 
     bool m_is_midbtn_press = false;
     bool m_has_pic = false;
+
+    qreal img_height = 0.0;
 
     QGraphicsScene *m_scene;
     QGraphicsPixmapItem *m_item = nullptr;

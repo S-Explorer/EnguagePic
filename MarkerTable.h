@@ -1,6 +1,10 @@
 #ifndef MARKERTABLE_H
 #define MARKERTABLE_H
 
+#define LIN_MODE 0
+#define LOG_MODE 1
+#define AIX_MODE 2
+
 #include <QAbstractTableModel>
 
 class ImagePreviewer;
@@ -10,6 +14,7 @@ class MarkerTable : public QAbstractTableModel{
 public:
     MarkerTable(ImagePreviewer* viwer);
     void DeleteRow(int row);
+    void CalRelData(int type);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     int rowCount(const QModelIndex & /* parent */) const override;
     int columnCount(const QModelIndex & /* parent */) const override;

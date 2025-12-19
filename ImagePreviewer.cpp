@@ -62,6 +62,9 @@ void ImagePreviewer::LoadImage(const QString &pic_path){
     m_item = nullptr;
 
     QPixmap pixmap(pic_path);
+
+    img_height = pixmap.height();
+
     // open target pic
     if (!pixmap.isNull()) {
         m_item = m_scene->addPixmap(pixmap);
@@ -95,6 +98,10 @@ void ImagePreviewer::ResetMarker(){
 
 int ImagePreviewer::CurMarkerSize(){
     return axe_marker.size() + cur_marker.size();
+}
+
+qreal ImagePreviewer::GetImgHeight() const{
+    return img_height;
 }
 
 void ImagePreviewer::wheelEvent(QWheelEvent* e){
