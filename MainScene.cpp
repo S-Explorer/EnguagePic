@@ -36,6 +36,7 @@ MainScene::MainScene(QWidget* parent)
     data_viewer->verticalHeader()->hide();
     data_viewer->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     data_viewer->setEditTriggers(QAbstractItemView::DoubleClicked);
+    data_viewer->setMouseTracking(true);
 
     sec_layout->addWidget(pic_viewer);
     sec_layout->addWidget(data_viewer);

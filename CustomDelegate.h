@@ -27,6 +27,7 @@ signals:
 private:
     int m_btn_col;
     mutable QRect m_btn_rect;
+    mutable QModelIndex m_press_index;
 };
 
 class EditDelegate : public QStyledItemDelegate {
