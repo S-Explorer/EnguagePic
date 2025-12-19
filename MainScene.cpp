@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "ImagePreviewer.h"
 #include "MarkerTable.h"
+#include "CustomDelegate.h"
 
 #include <QFileDialog>
 #include <QPushButton>
