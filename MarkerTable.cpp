@@ -1,13 +1,86 @@
 #include "MarkerTable.h"
 #include "ImagePreviewer.h"
 
+#include <QMessageBox>
 #include <QtGui/QColor>
 
+#include <QDebug>
+
+#define BTN_BOUNDRY_SZIE 2
+
 QVector<QString> header_data{"name","x","y","remove"};
+
+/* * * * * * * * * * * * * * *
+ *       ButtonDeleGate      *
+ * * * * * * * * * * * * * * */
+
+ButtonDelegate::ButtonDelegate(int btn_col, QObject* parent)
+    : QStyledItemDelegate(parent), m_btn_col(btn_col) {}
+
+void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
+        const QModelIndex& index) const {
+    // btn column
+    if (index.column() == m_btn_col && index.row() < 3){
+        m_btn_rect = option.rect.adjusted(BTN_BOUNDRY_SZIE, BTN_BOUNDRY_SZIE,
+                -BTN_BOUNDRY_SZIE, -BTN_BOUNDRY_SZIE);
+        // btn style
+        QStyleOptionButton btn_option;
+        btn_option.rect = m_btn_rect;
+        btn_option.text = "delete";
+        btn_option.state = QStyle::State_Enabled;
+        
+        QWidget* widget = qobject_cast<QWidget*>(parent());
+        if (widget) {
+            QPoint mouse_pos = widget->mapFromGlobal(QCursor::pos());
+            if (m_btn_rect.contains(mouse_pos)){
+                btn_option.state |= QStyle::State_MouseOver;
+            }
+        }
+
+        QApplication::style()->drawControl(QStyle::CE_PushButton, &btn_option,
+                painter);
+    }else {
+        QStyledItemDelegate::paint(painter, option, index);
+    }
+}
+
+bool ButtonDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
+        const QStyleOptionViewItem& option, const QModelIndex& index){
+    if (index.column() == m_btn_col && index.row() < 3) {
+        if (e->type() == QEvent::MouseButtonPress){
+            qDebug() << "Button Delegate Preses : " << index.row() ;
+            QMouseEvent* mosue_e = static_cast<QMouseEvent*>(e);
+
+            if (m_btn_rect.contains(mosue_e->pos())) {
+                emit Clicked(index.row());
+                qDebug() << "\tButton emit sig end!";
+                return true;
+            }
+        }
+    }
+
+    return QStyledItemDelegate::editorEvent(e, model, option, index);
+}
+
+QSize ButtonDelegate::sizeHint(const QStyleOptionViewItem& option,
+        const QModelIndex& index) const {
+    if (index.column() == m_btn_col ){
+        return QSize(60, 30);
+    }
+
+    return QStyledItemDelegate::sizeHint(option, index);
+}
+
+
+/* * * * * * * * * * * * * * *
+ *       MarkerTable         *
+ * * * * * * * * * * * * * * */
 
 MarkerTable::MarkerTable(ImagePreviewer* viwer)
     : m_viwer(viwer){
     connect(m_viwer, &ImagePreviewer::AddRow, this, &MarkerTable::InsertData);
+    connect(m_viwer, &ImagePreviewer::ClearData, this, &MarkerTable::ClearData);
+    connect(this, &MarkerTable::RowDeleted, m_viwer, &ImagePreviewer::DelMarkerData);
 }
 
 int MarkerTable::rowCount(const QModelIndex & /* parent */) const  {
@@ -107,4 +180,33 @@ void MarkerTable::InsertData(bool is_axe, qreal x, qreal y){
         cur_points.emplace_back(QPointF(x, y));
     }
     endResetModel();
+}
+
+void MarkerTable::ClearData(){
+    beginResetModel();
+    axe_points.clear();
+    cur_points.clear();
+    endResetModel();
+}
+
+void MarkerTable::DeleteRow(int row){
+    qDebug() << "Table delete row : " << row + 1 << " , axe size : " << axe_points.size();  
+    // protect
+    if (row > axe_points.size() - 1) return;
+
+    QMessageBox::StandardButton reply = QMessageBox::question( m_viwer,
+            "delete data",
+            "please make sure that you want delete this line",
+            QMessageBox::Yes | QMessageBox::No);
+
+    if (row >= 0 && reply == QMessageBox::Yes){
+        beginResetModel();
+        if (row < 3){
+            axe_points.removeAt(row);
+        }else{
+            cur_points.removeAt(row - 3);
+        }
+        endResetModel();
+        emit RowDeleted(row);
+    }
 }

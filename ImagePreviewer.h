@@ -41,6 +41,7 @@ public:
 
 signals:
     void AddRow(bool is_axe, qreal x, qreal y);
+    void ClearData();
 
 protected:
     void wheelEvent(QWheelEvent* e) override;
@@ -49,6 +50,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
+    void DelMarkerData(int row); 
 private:
 
     bool m_is_midbtn_press = false;

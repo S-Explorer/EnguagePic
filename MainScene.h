@@ -18,10 +18,16 @@ private:
     void OpenTargetPic();
     void ExportData();
 
+    void SetAxeMode();
+    void SetPointMode();
+
     QPushButton* btn_pic;
+    QPushButton* btn_screen;
     QPushButton* btn_axe;
     QPushButton* btn_point;
     QPushButton* btn_clear_marker;
+    QPushButton* btn_clear_axe;
+    QPushButton* btn_clear_point;
 
     QTableView* data_viewer;
 

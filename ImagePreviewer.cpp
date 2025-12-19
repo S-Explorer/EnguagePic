@@ -45,8 +45,8 @@ ImagePreviewer::ImagePreviewer(QWidget *parent)
     setRenderHint(QPainter::SmoothPixmapTransform);
 
     //debug test
-    cur_mode = DRAW_MODE::POINT;
-    setCursor(Qt::CrossCursor);
+    //cur_mode = DRAW_MODE::AXE;
+    //setCursor(Qt::CrossCursor);
 }
 
 void ImagePreviewer::LoadImage(const QString &pic_path){
@@ -89,6 +89,8 @@ void ImagePreviewer::ResetMarker(){
     }
     axe_marker.clear();
     cur_marker.clear();
+
+    emit ClearData();
 }
 
 int ImagePreviewer::CurMarkerSize(){
@@ -129,7 +131,7 @@ void ImagePreviewer::mousePressEvent(QMouseEvent *event)
             MarkerPoint* m = new MarkerPoint(tmp_c);
             m->addToScene(m_scene, scenePos);
             tmp->append(m);
-            emit AddRow(false, scenePos.x(), scenePos.y());
+            emit AddRow(cur_mode == DRAW_MODE::AXE, scenePos.x(), scenePos.y());
             qDebug() << "marker size : " << tmp->size() << ", pos : " << scenePos;
         }
 
@@ -175,4 +177,15 @@ void ImagePreviewer::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+void ImagePreviewer::DelMarkerData(int row){
+    // remove marker
+    qDebug() << "ImagePreviewer Delete Marker : " << row + 1;
+    if (row < 3){
+        axe_marker.at(row)->clear(m_scene);
+        axe_marker.removeAt(row);
+    }else {
+        axe_marker.at(row - 3)->clear(m_scene);
+        cur_marker.removeAt(row - 3);
+    }
+}
 
