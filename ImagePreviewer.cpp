@@ -191,7 +191,7 @@ void ImagePreviewer::DelMarkerData(int row){
         axe_marker.at(row)->clear(m_scene);
         axe_marker.removeAt(row);
     }else {
-        axe_marker.at(row - 3)->clear(m_scene);
+        cur_marker.at(row - 3)->clear(m_scene);
         cur_marker.removeAt(row - 3);
     }
 }
