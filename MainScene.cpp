@@ -10,6 +10,9 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QComboBox>
+#include <QFile>
+#include <QTextStream>
+#include <QMessageBox>
 
 MainScene::MainScene(QWidget* parent)
     :QWidget(parent){
@@ -91,6 +94,51 @@ void MainScene::ExportData()
                             "save data",
                             QString(),
                             "csv file(*.csv)");
+    
+    if (data_path.isEmpty()) {
+        return;
+    }
+    
+    // 确保文件后缀为 .csv
+    if (!data_path.endsWith(".csv", Qt::CaseInsensitive)) {
+        data_path += ".csv";
+    }
+    
+    QFile file(data_path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, "Error", "Failed to open file for writing.");
+        return;
+    }
+    
+    QTextStream stream(&file);
+    
+    // 获取模型
+    QAbstractItemModel* model = data_viewer->model();
+    if (!model) {
+        QMessageBox::warning(this, "Error", "No data model available.");
+        file.close();
+        return;
+    }
+    
+    // 写入表头
+    stream << "name,x,y\n";
+    
+    // 写入数据（前3列：name, x, y）
+    int rowCount = model->rowCount();
+    for (int row = 0; row < rowCount; ++row) {
+        QStringList rowData;
+        for (int col = 0; col < 3; ++col) {
+            QModelIndex index = model->index(row, col);
+            QVariant value = model->data(index, Qt::DisplayRole);
+            rowData << value.toString();
+        }
+        stream << rowData.join(",") << "\n";
+    }
+    
+    file.close();
+    
+    QMessageBox::information(this, "Success", 
+        QString("Data exported to:\n%1").arg(data_path));
 }
 
 void MainScene::SetAxeMode(){
