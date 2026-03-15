@@ -13,19 +13,20 @@ find_package( Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 message(STATUS "Qt${QT_VERSION_MAJOR} has been found")
 
-file(GLOB header *.h)
-file(GLOB source *.cpp)
+file(GLOB header src/*.h)
+file(GLOB source src/*.cpp)
 
 # 资源文件（Qt 资源系统）
-set(qrc_file resources.qrc)
+set(qrc_file res/resources.qrc)
 
 qt_standard_project_setup()
 
 # 平台特定的资源
 if(WIN32)
     # Windows: 添加 .rc 文件设置可执行文件图标
-    set(rc_file app_icon.rc)
+    set(rc_file res/app_icon.rc)
     qt_add_executable(enguage ${header} ${source} ${qrc_file} ${rc_file})
+    set_target_properties(enguage PROPERTIES WIN32_EXECUTABLE TRUE)
 else()
     # Linux/macOS: 仅使用 Qt 资源文件
     qt_add_executable(enguage ${header} ${source} ${qrc_file})
