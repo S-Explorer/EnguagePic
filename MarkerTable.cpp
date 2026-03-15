@@ -250,14 +250,14 @@ bool MarkerTable::setData(const QModelIndex &index, const QVariant &value, int r
         if (index.column() != 1 && index.column() != 2 ) return false;;
 
         if (index.row() < 3) {
-            qDebug() << "edit data in axe points";
+            // qDebug() << "edit data in axe points";
             // axe data
             if (index.row() > axe_points.size() - 1) return false;
             // ok
             if (index.column() == 1) axe_real[index.row()].setX(value.toDouble());
             else axe_real[index.row()].setY(value.toDouble());
         }else {
-            qDebug() << "edit data in curve points";
+            // qDebug() << "edit data in curve points";
             // cur data
             if (index.row() > cur_points.size() + 2) return false;
             // ok
@@ -291,7 +291,7 @@ void MarkerTable::ClearData(){
 }
 
 void MarkerTable::DeleteRow(int row){
-    qDebug() << "Table delete row : " << row + 1 << " , axe size : " << axe_points.size();  
+    // qDebug() << "Table delete row : " << row + 1 << " , axe size : " << axe_points.size();  
     // protect
     if (row > axe_points.size() - 1) return;
 

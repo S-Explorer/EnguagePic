@@ -139,7 +139,7 @@ void ImagePreviewer::mousePressEvent(QMouseEvent *event)
             m->addToScene(m_scene, scenePos);
             tmp->append(m);
             emit AddRow(cur_mode == DRAW_MODE::AXE, scenePos.x(), scenePos.y());
-            qDebug() << "marker size : " << tmp->size() << ", pos : " << scenePos;
+            // qDebug() << "marker size : " << tmp->size() << ", pos : " << scenePos;
         }
 
         return;
@@ -186,7 +186,7 @@ void ImagePreviewer::mouseReleaseEvent(QMouseEvent *event)
 
 void ImagePreviewer::DelMarkerData(int row){
     // remove marker
-    qDebug() << "ImagePreviewer Delete Marker : " << row + 1;
+    // qDebug() << "ImagePreviewer Delete Marker : " << row + 1;
     if (row < 3){
         axe_marker.at(row)->clear(m_scene);
         axe_marker.removeAt(row);

@@ -18,11 +18,18 @@
 #include <QDir>
 #include <QDateTime>
 #include <QTimer>
+#include <QIcon>
 
 MainScene::MainScene(QWidget* parent)
     :QWidget(parent){
     setGeometry(600, 300, 1000, 500);
     setMinimumWidth(1000);
+    setMinimumHeight(500);
+    
+    // 设置窗口图标（Linux 需要）
+    #ifdef Q_OS_LINUX
+        setWindowIcon(QIcon(":/enguage.ico"));
+    #endif
     QVBoxLayout* main_layout = new QVBoxLayout;
     QHBoxLayout* btn_Layout  = new QHBoxLayout;
     QHBoxLayout* sec_layout  = new QHBoxLayout;
