@@ -5,6 +5,7 @@
 
 // predeclare
 class ImagePreviewer;
+class ScreenCapture;
 class QPushButton;
 class QTableView;
 class QComboBox;
@@ -18,6 +19,7 @@ public:
 private:
     void OpenTargetPic();
     void ExportData();
+    void CaptureScreen();
 
     void SetAxeMode();
     void SetPointMode();
@@ -38,6 +40,7 @@ private:
     QTableView* data_viewer;
 
     ImagePreviewer* pic_viewer;
+    ScreenCapture* m_screenCapture;
 };
 
 #endif // !MAIN_SCENE_H

@@ -2,6 +2,8 @@
 #include "ImagePreviewer.h"
 #include "MarkerTable.h"
 #include "CustomDelegate.h"
+#include "ScreenCapture.h"
+#include "Style.h"
 
 #include <QFileDialog>
 #include <QPushButton>
@@ -13,6 +15,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QDir>
+#include <QDateTime>
+#include <QTimer>
 
 MainScene::MainScene(QWidget* parent)
     :QWidget(parent){
@@ -44,21 +49,49 @@ MainScene::MainScene(QWidget* parent)
     sec_layout->addWidget(pic_viewer);
     sec_layout->addWidget(data_viewer);
 
-    btn_pic          = new QPushButton("open pic");
-    btn_screen       = new QPushButton("screen");
-    btn_axe          = new QPushButton("axe");
-    btn_point        = new QPushButton("P");
-    btn_clear_marker = new QPushButton("clear marker");
-    btn_clear_axe    = new QPushButton("clear axe");
-    btn_clear_point  = new QPushButton("clear points");
+    btn_pic          = new QPushButton("打开图片");
+    btn_screen       = new QPushButton("截屏");
+    btn_axe          = new QPushButton("轴点");
+    btn_point        = new QPushButton("线点");
+    btn_clear_marker = new QPushButton("删除线点");
+    btn_clear_axe    = new QPushButton("删除轴点");
+    btn_clear_point  = new QPushButton("删除所有点");
     cbx_x_type       = new QComboBox();
     cbx_y_type       = new QComboBox();
-    cbx_x_type->addItems({"linear","log"});
-    cbx_y_type->addItems({"linear","log"});
+    cbx_x_type->addItems({"线性","对数"});
+    cbx_y_type->addItems({"线性","对数"});
     cbx_x_type->setToolTip("X轴类型");
     cbx_y_type->setToolTip("Y轴类型");
-    btn_cal_data     = new QPushButton("calculate");
-    btn_save         = new QPushButton("export data");
+    btn_cal_data     = new QPushButton("计算坐标");
+    btn_save         = new QPushButton("导出数据");
+    
+    // ========== 应用样式 ==========
+    // 全局样式
+    setStyleSheet(AppStyle::getGlobalStyle());
+    
+    // 主要按钮样式（功能按钮）
+    btn_pic->setStyleSheet(AppStyle::getPrimaryButtonStyle());
+    btn_screen->setStyleSheet(AppStyle::getPrimaryButtonStyle());
+    btn_cal_data->setStyleSheet(AppStyle::getPrimaryButtonStyle());
+    btn_save->setStyleSheet(AppStyle::getPrimaryButtonStyle());
+    
+    // 次要按钮样式（模式切换）
+    btn_axe->setStyleSheet(AppStyle::getSecondaryButtonStyle());
+    btn_point->setStyleSheet(AppStyle::getSecondaryButtonStyle());
+    
+    // 清除按钮使用危险样式（红色）
+    btn_clear_marker->setStyleSheet(AppStyle::getDangerButtonStyle());
+    btn_clear_axe->setStyleSheet(AppStyle::getDangerButtonStyle());
+    btn_clear_point->setStyleSheet(AppStyle::getDangerButtonStyle());
+    
+    // 下拉框样式
+    cbx_x_type->setStyleSheet(AppStyle::getComboBoxStyle());
+    cbx_y_type->setStyleSheet(AppStyle::getComboBoxStyle());
+    
+    // 表格样式
+    data_viewer->setStyleSheet(AppStyle::getTableViewStyle());
+    // =============================
+    
     btn_Layout->addWidget(btn_pic);
     btn_Layout->addWidget(btn_screen);
     btn_Layout->addWidget(btn_axe);
@@ -72,7 +105,19 @@ MainScene::MainScene(QWidget* parent)
     btn_Layout->addWidget(btn_save);
     setLayout(main_layout);
 
+    // 创建截图工具
+    m_screenCapture = new ScreenCapture(this);
+    connect(m_screenCapture, &ScreenCapture::captured, this, [this](const QPixmap& pixmap) {
+        // 生成临时文件名并保存
+        QString tempPath = QDir::temp().filePath(QString("capture_%1.png")
+            .arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss")));
+        if (pixmap.save(tempPath)) {
+            pic_viewer->LoadImage(tempPath);
+        }
+    });
+
     connect(btn_pic, &QPushButton::clicked, this, &MainScene::OpenTargetPic);
+    connect(btn_screen, &QPushButton::clicked, this, &MainScene::CaptureScreen);
     connect(btn_clear_marker, &QPushButton::clicked, pic_viewer, &ImagePreviewer::ResetMarker);
     connect(btn_axe, &QPushButton::clicked, this, &MainScene::SetAxeMode);
     connect(btn_point, &QPushButton::clicked, this, &MainScene::SetPointMode);
@@ -87,6 +132,23 @@ MainScene::MainScene(QWidget* parent)
 
 MainScene::~MainScene() {
     delete pic_viewer;
+    delete m_screenCapture;
+}
+
+void MainScene::CaptureScreen() {
+    // 先最小化主窗口，避免截到自己（保留任务栏图标）
+    showMinimized();
+    
+    // 短暂延迟，确保窗口完全最小化
+    QTimer::singleShot(500, this, [this]() {
+        // 启动截图
+        bool success = m_screenCapture->startCapture();
+        
+        // 截图完成后恢复主窗口
+        showNormal();
+        raise();
+        activateWindow();
+    });
 }
 
 void MainScene::OpenTargetPic(){
