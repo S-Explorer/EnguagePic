@@ -51,8 +51,12 @@ MainScene::MainScene(QWidget* parent)
     btn_clear_marker = new QPushButton("clear marker");
     btn_clear_axe    = new QPushButton("clear axe");
     btn_clear_point  = new QPushButton("clear points");
-    cbx_type         = new QComboBox();
-    cbx_type->addItems({"linear","logarithmic","axial"});
+    cbx_x_type       = new QComboBox();
+    cbx_y_type       = new QComboBox();
+    cbx_x_type->addItems({"linear","log"});
+    cbx_y_type->addItems({"linear","log"});
+    cbx_x_type->setToolTip("X轴类型");
+    cbx_y_type->setToolTip("Y轴类型");
     btn_cal_data     = new QPushButton("calculate");
     btn_save         = new QPushButton("export data");
     btn_Layout->addWidget(btn_pic);
@@ -62,7 +66,8 @@ MainScene::MainScene(QWidget* parent)
     btn_Layout->addWidget(btn_clear_marker);
     btn_Layout->addWidget(btn_clear_axe);
     btn_Layout->addWidget(btn_clear_point);
-    btn_Layout->addWidget(cbx_type);
+    btn_Layout->addWidget(cbx_x_type);
+    btn_Layout->addWidget(cbx_y_type);
     btn_Layout->addWidget(btn_cal_data);
     btn_Layout->addWidget(btn_save);
     setLayout(main_layout);
@@ -72,7 +77,12 @@ MainScene::MainScene(QWidget* parent)
     connect(btn_axe, &QPushButton::clicked, this, &MainScene::SetAxeMode);
     connect(btn_point, &QPushButton::clicked, this, &MainScene::SetPointMode);
     connect(m_btn_del, &ButtonDelegate::Clicked, m_table_model, &MarkerTable::DeleteRow);
-    connect(btn_cal_data, &QPushButton::clicked, [=](){m_table_model->CalRelData(0);});
+    connect(btn_cal_data, &QPushButton::clicked, [=](){
+        int x_type = cbx_x_type->currentIndex();
+        int y_type = cbx_y_type->currentIndex();
+        m_table_model->CalRelData(x_type, y_type);
+    });
+    connect(btn_save, &QPushButton::clicked, this, &MainScene::ExportData);
 }
 
 MainScene::~MainScene() {

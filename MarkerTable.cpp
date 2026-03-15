@@ -9,6 +9,7 @@
 #include <QThread>
 
 #include <QDebug>
+#include <cmath>
 
 QVector<QString> header_data{"name","x","y","remove"};
 
@@ -54,14 +55,89 @@ void CalLinMode(QVector<QPointF>& axe_p, QVector<QPointF>& axe_real,
     }
 }
 
-void CalLogMode(QVector<QPointF>& axe_p, QVector<QPointF>& axe_real,
-                QVector<QPointF>& cur_p, QVector<QPointF>& cur_real){
+// 计算单个轴的映射值
+// pixel: 像素坐标
+// p1, p2: 两个参考点的像素坐标和实际值
+// is_log: 是否对数轴
+// 返回值: 实际值
+double MapAxisValue(double pixel, double p1_pixel, double p2_pixel, 
+                    double v1, double v2, bool is_log) {
+    // 检查除零
+    if (qAbs(p2_pixel - p1_pixel) < 1e-9) {
+        return v1;
+    }
+    
+    // 像素位置的比例
+    double ratio = (pixel - p1_pixel) / (p2_pixel - p1_pixel);
+    
+    if (is_log) {
+        // 对数轴：在log空间中线性插值
+        double log_v1 = log10(v1);
+        double log_v2 = log10(v2);
+        double log_result = log_v1 + ratio * (log_v2 - log_v1);
+        return pow(10.0, log_result);
+    } else {
+        // 线性轴：直接线性插值
+        return v1 + ratio * (v2 - v1);
+    }
+}
 
+// x_type: 0=linear, 1=log
+// y_type: 0=linear, 1=log
+// 从3个参考点中找出X/Y方向的极值点来确定映射
+void CalMixedMode(QVector<QPointF>& axe_p, QVector<QPointF>& axe_real,
+                  QVector<QPointF>& cur_p, QVector<QPointF>& cur_real,
+                  qreal height, int x_type, int y_type){
+    
+    if (axe_p.size() < 2) return;
+    
+    cur_real.resize(cur_p.size());
+    
+    // 找出X方向的极值点（最小和最大X）
+    int x_min_idx = 0, x_max_idx = 0;
+    for (int i = 1; i < axe_p.size(); i++) {
+        if (axe_p[i].x() < axe_p[x_min_idx].x()) x_min_idx = i;
+        if (axe_p[i].x() > axe_p[x_max_idx].x()) x_max_idx = i;
+    }
+    
+    // 找出Y方向的极值点（最小和最大Y，注意Y坐标翻转）
+    int y_min_idx = 0, y_max_idx = 0;
+    for (int i = 1; i < axe_p.size(); i++) {
+        double y_curr = height - axe_p[i].y();
+        double y_min = height - axe_p[y_min_idx].y();
+        double y_max = height - axe_p[y_max_idx].y();
+        if (y_curr < y_min) y_min_idx = i;
+        if (y_curr > y_max) y_max_idx = i;
+    }
+    
+    // X轴映射参数（使用X极值点）
+    double px_min = axe_p[x_min_idx].x();
+    double px_max = axe_p[x_max_idx].x();
+    double vx_min = axe_real[x_min_idx].x();
+    double vx_max = axe_real[x_max_idx].x();
+    
+    // Y轴映射参数（使用Y极值点）
+    double py_min = height - axe_p[y_min_idx].y();
+    double py_max = height - axe_p[y_max_idx].y();
+    double vy_min = axe_real[y_min_idx].y();
+    double vy_max = axe_real[y_max_idx].y();
+    
+    for (qsizetype idx = 0; idx < cur_p.size(); idx++){
+        double px = cur_p[idx].x();
+        double py = height - cur_p[idx].y();
+        
+        double x_value = MapAxisValue(px, px_min, px_max, vx_min, vx_max, x_type == 1);
+        double y_value = MapAxisValue(py, py_min, py_max, vy_min, vy_max, y_type == 1);
+        
+        cur_real[idx] = QPointF(x_value, y_value);
+    }
 }
 
 void CalAixMode(QVector<QPointF>& axe_p, QVector<QPointF>& axe_real,
-                QVector<QPointF>& cur_p, QVector<QPointF>& cur_real){
-
+                QVector<QPointF>& cur_p, QVector<QPointF>& cur_real,
+                qreal height){
+    // 轴向模式（预留）
+    CalLinMode(axe_p, axe_real, cur_p, cur_real, height);
 }
 
 
@@ -250,10 +326,10 @@ Qt::ItemFlags MarkerTable::flags(const QModelIndex &index) const
     return flags;
 }
 
-void MarkerTable::CalRelData(int type){
+void MarkerTable::CalRelData(int x_type, int y_type){
 
-    if (axe_points.size() < 3) {
-        QMessageBox::warning(m_viwer, "warning", "not enough axe point");
+    if (axe_points.size() < 2) {
+        QMessageBox::warning(m_viwer, "warning", "not enough axe point (need at least 2)");
         return;
     }
 
@@ -262,5 +338,39 @@ void MarkerTable::CalRelData(int type){
         return;
     }
 
-    CalLinMode(axe_points, axe_real, cur_points, cur_real, m_viwer->GetImgHeight());
+    // 检查对数轴的参考值是否为正
+    if (x_type == 1) {  // X轴是对数轴
+        for (int i = 0; i < axe_real.size() && i < 3; i++) {
+            if (axe_real[i].x() <= 0) {
+                QMessageBox::warning(m_viwer, "warning", 
+                    QString("X轴为对数轴，要求所有X参考值必须大于0\n"
+                            "点%1的X值为: %2").arg(i+1).arg(axe_real[i].x()));
+                return;
+            }
+        }
+    }
+    if (y_type == 1) {  // Y轴是对数轴
+        for (int i = 0; i < axe_real.size() && i < 3; i++) {
+            if (axe_real[i].y() <= 0) {
+                QMessageBox::warning(m_viwer, "warning", 
+                    QString("Y轴为对数轴，要求所有Y参考值必须大于0\n"
+                            "点%1的Y值为: %2").arg(i+1).arg(axe_real[i].y()));
+                return;
+            }
+        }
+    }
+
+    // x_type: 0=linear, 1=log
+    // y_type: 0=linear, 1=log
+    if (x_type == 0 && y_type == 0) {
+        // 双线性
+        CalLinMode(axe_points, axe_real, cur_points, cur_real, m_viwer->GetImgHeight());
+    } else {
+        // 包含对数的混合模式
+        CalMixedMode(axe_points, axe_real, cur_points, cur_real, 
+                     m_viwer->GetImgHeight(), x_type, y_type);
+    }
+    
+    // 通知视图数据已更新
+    emit dataChanged(index(0, 1), index(rowCount(QModelIndex()) - 1, 2));
 }

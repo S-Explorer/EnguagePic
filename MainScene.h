@@ -32,7 +32,8 @@ private:
     QPushButton* btn_cal_data;
     QPushButton* btn_save;
 
-    QComboBox* cbx_type;
+    QComboBox* cbx_x_type;
+    QComboBox* cbx_y_type;
 
     QTableView* data_viewer;
 

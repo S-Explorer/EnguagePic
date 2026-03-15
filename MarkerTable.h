@@ -14,7 +14,7 @@ class MarkerTable : public QAbstractTableModel{
 public:
     MarkerTable(ImagePreviewer* viwer);
     void DeleteRow(int row);
-    void CalRelData(int type);
+    void CalRelData(int x_type, int y_type);
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     int rowCount(const QModelIndex & /* parent */) const override;
     int columnCount(const QModelIndex & /* parent */) const override;
