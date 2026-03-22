@@ -14,8 +14,8 @@ ButtonDelegate::ButtonDelegate(int btn_col, QObject* parent)
 
 void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
         const QModelIndex& index) const {
-    // btn column
-    if (index.column() == m_btn_col && index.row() < 3){
+    // btn column - 为所有行显示删除按钮（包括轴点和线点）
+    if (index.column() == m_btn_col){
         m_btn_rect = option.rect.adjusted(BTN_BOUNDRY_SZIE, BTN_BOUNDRY_SZIE,
                 -BTN_BOUNDRY_SZIE, -BTN_BOUNDRY_SZIE);
         // btn style
@@ -23,7 +23,7 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
         btn_option.rect = m_btn_rect;
         btn_option.text = "delete";
         btn_option.state = QStyle::State_Enabled;
-        
+
         if (option.state & QStyle::State_MouseOver){
             btn_option.state |= QStyle::State_MouseOver;
         }

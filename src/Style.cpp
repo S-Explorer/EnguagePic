@@ -76,15 +76,25 @@ QString AppStyle::getSecondaryButtonStyle() {
             min-height: 24px;
             font-size: 12px;
         }
-        
+
         QPushButton:hover {
             background-color: #E0F2F1;
         }
-        
+
         QPushButton:pressed {
             background-color: #B2DFDB;
         }
-        
+
+        QPushButton:checked {
+            background-color: #009688;
+            color: white;
+            border: 1px solid #009688;
+        }
+
+        QPushButton:checked:hover {
+            background-color: #00BFA5;
+        }
+
         QPushButton:disabled {
             background-color: #F5F5F5;
             color: #BDBDBD;
