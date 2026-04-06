@@ -400,6 +400,7 @@ void MainScene::onDeleteItem() {
         }
     } else if (tree->isAxisSelected()) {
         // 删除坐标轴
+        qDebug() << "删除坐标轴";
         AxisData* axis = tree->getSelectedAxis();
         if (axis) {
             // 如果只有一个坐标轴，不允许删除
@@ -410,8 +411,9 @@ void MainScene::onDeleteItem() {
             dataManager->removeAxis(axis);
         }
     }
-    
+    // 刷新预览区和列表信息
     pic_viewer->refreshDisplay();
+    tree->refresh();
 }
 
 void MainScene::onAxisSelected(AxisData* axis) {

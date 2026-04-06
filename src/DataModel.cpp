@@ -55,22 +55,13 @@ void CurveData::setVisible(bool visible) {
 /* * * * * * * * * * * * * * *
  *       AxisData            *
  * * * * * * * * * * * * * * */
+unsigned int AxisData::AxisNumber = 1;
 
 AxisData::AxisData(const QString& name, QObject* parent)
     : QObject(parent), id(QUuid::createUuid().toString()), name(name) {
     if (this->name.isEmpty()) {
-        // 从父对象获取计数器来命名
-        if (parent) {
-            int count = 0;
-            for (auto* child : parent->findChildren<AxisData*>()) {
-                if (child != this) count++;
-            }
-            this->name = QString("坐标轴%1").arg(count + 1);
-        } else {
-            this->name = "坐标轴1";
-        }
+        this->name = QString("坐标轴%1").arg(AxisNumber++);
     }
-    
     // 初始化参考点数组大小为3
     axePixelPoints.reserve(3);
     axeRealPoints.reserve(3);
@@ -88,23 +79,13 @@ CurveData* AxisData::addCurve(const QString& name) {
     CurveData* curve = new CurveData(name, this);
     curves.append(curve);
     emit curveAdded(curve);
-    emit dataChanged();
     return curve;
 }
 
 void AxisData::removeCurve(CurveData* curve) {
     int index = curves.indexOf(curve);
-    if (index >= 0) {
-        removeCurve(index);
-    }
-}
-
-void AxisData::removeCurve(int index) {
     if (index >= 0 && index < curves.size()) {
-        CurveData* curve = curves.takeAt(index);
-        emit curveRemoved(curve);
-        delete curve;
-        emit dataChanged();
+        curves.removeAt(index);
     }
 }
 
@@ -120,7 +101,6 @@ void AxisData::addAxePoint(const QPointF& pixel, const QPointF& real) {
         axePixelPoints.append(pixel);
         axeRealPoints.append(real);
         emit axePointsChanged();
-        emit dataChanged();
     }
 }
 
@@ -129,7 +109,6 @@ void AxisData::removeAxePoint(int index) {
         axePixelPoints.removeAt(index);
         axeRealPoints.removeAt(index);
         emit axePointsChanged();
-        emit dataChanged();
     }
 }
 
@@ -137,7 +116,6 @@ void AxisData::clearAxePoints() {
     axePixelPoints.clear();
     axeRealPoints.clear();
     emit axePointsChanged();
-    emit dataChanged();
 }
 
 // 计算单个轴的映射值

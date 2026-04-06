@@ -48,6 +48,7 @@ private:
 class AxisData : public QObject {
     Q_OBJECT
 public:
+    static unsigned int AxisNumber;
     explicit AxisData(const QString& name = "", QObject* parent = nullptr);
     ~AxisData();
     
@@ -64,11 +65,10 @@ public:
     QVector<QPointF> axeRealPoints;   // 实际坐标
     
     // 该坐标轴下的曲线
-    QVector<CurveData*> curves;
+    QList<CurveData*> curves;
     
     CurveData* addCurve(const QString& name = "");
     void removeCurve(CurveData* curve);
-    void removeCurve(int index);
     CurveData* getCurve(int index);
     int curveCount() const { return curves.size(); }
     
@@ -82,7 +82,6 @@ public:
     void calculateAllCurves();
     
 signals:
-    void dataChanged();
     void curveAdded(CurveData* curve);
     void curveRemoved(CurveData* curve);
     void axePointsChanged();

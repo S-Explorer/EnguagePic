@@ -245,6 +245,7 @@ void LeftPanel::setupUI() {
     btnAddAxis = new QPushButton("+ 坐标轴", this);
     btnAddCurve = new QPushButton("+ 曲线", this);
     btnDelete = new QPushButton("- 删除", this);
+    btnDelete->hide();
     
     // 应用样式
     btnAddAxis->setStyleSheet(AppStyle::getPrimaryButtonStyle());

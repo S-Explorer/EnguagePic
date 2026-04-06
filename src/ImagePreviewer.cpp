@@ -200,27 +200,38 @@ void ImagePreviewer::renderAxis(AxisData* axis) {
 
     // 如果有3个点，用透明度30%的红线连接形成平行四边形
     if (axis->axePixelPoints.size() == 3) {
-        QPen connectionPen(QColor(255, 0, 0, 77), m_connectionLineWidth);  // 30%透明度红色
+        // 改用包围盒算法计算
+        QPen connectionPen(QColor(255, 0, 0, 77), m_connectionLineWidth);
 
-        // 获取3个点
-        QPointF p1 = axis->axePixelPoints[0];
-        QPointF p2 = axis->axePixelPoints[1];
-        QPointF p3 = axis->axePixelPoints[2];
+        // 计算所有点的边界
+        qreal minX = axis->axePixelPoints[0].x();
+        qreal maxX = axis->axePixelPoints[0].x();
+        qreal minY = axis->axePixelPoints[0].y();
+        qreal maxY = axis->axePixelPoints[0].y();
 
-        // 计算第4个点（平行四边形的对角点）
-        // 向量 p1->p2 + 向量 p1->p3 = 向量 p1->p4
-        QPointF p4(p2.x() + p3.x() - p1.x(), p2.y() + p3.y() - p1.y());
+        for (const auto& point : axis->axePixelPoints) {
+            minX = qMin(minX, point.x());
+            maxX = qMax(maxX, point.x());
+            minY = qMin(minY, point.y());
+            maxY = qMax(maxY, point.y());
+        }
 
-        // 连接四边形：p1-p2, p2-p4, p4-p3, p3-p1
-        QGraphicsLineItem* line1 = m_scene->addLine(p1.x(), p1.y(), p2.x(), p2.y(), connectionPen);
-        QGraphicsLineItem* line2 = m_scene->addLine(p2.x(), p2.y(), p4.x(), p4.y(), connectionPen);
-        QGraphicsLineItem* line3 = m_scene->addLine(p4.x(), p4.y(), p3.x(), p3.y(), connectionPen);
-        QGraphicsLineItem* line4 = m_scene->addLine(p3.x(), p3.y(), p1.x(), p1.y(), connectionPen);
+        // 创建矩形的四个顶点
+        QPointF topLeft(minX, minY);
+        QPointF topRight(maxX, minY);
+        QPointF bottomRight(maxX, maxY);
+        QPointF bottomLeft(minX, maxY);
 
-        connectionLines.append(line1);
-        connectionLines.append(line2);
-        connectionLines.append(line3);
-        connectionLines.append(line4);
+        // 连接矩形
+        auto addLine = [&](const QPointF& p1, const QPointF& p2) {
+            QGraphicsLineItem* line = m_scene->addLine(p1.x(), p1.y(), p2.x(), p2.y(), connectionPen);
+            connectionLines.append(line);
+        };
+
+        addLine(topLeft, topRight);
+        addLine(topRight, bottomRight);
+        addLine(bottomRight, bottomLeft);
+        addLine(bottomLeft, topLeft);
     }
 }
 
